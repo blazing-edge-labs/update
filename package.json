@@ -1,0 +1,35 @@
+{
+  "name": "deep-update",
+  "version": "0.0.1",
+  "description": "Utility for immutable deep updates of objects.",
+  "main": "lib",
+  "scripts": {
+    "lint": "eslint ./src",
+    "test": "test",
+    "build": "babel src -d lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkatic/update.git"
+  },
+  "keywords": [
+    "update",
+    "deep",
+    "immutable",
+    "utiity",
+    "reducers"
+  ],
+  "author": "Robert Katić",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rkatic/update/issues"
+  },
+  "homepage": "https://github.com/rkatic/update#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-preset-env": "^1.6.0",
+    "eslint": "^4.8.0"
+  }
+}
