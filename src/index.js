@@ -1,7 +1,7 @@
 const { isArray } = Array
 const protoOf = Object.getPrototypeOf
+
 const isFunc = z => typeof z === 'function'
-const isObject = z => !!z && typeof z === 'function' || typeof z === 'object'
 
 const isProps = (x) => {
   if (!x || typeof x !== 'object') {
@@ -12,18 +12,6 @@ const isProps = (x) => {
 }
 
 const clone = data => isArray(data) ? data.slice() : Object.assign({}, data)
-
-const toPathParts = path => {
-  if (isArray(path)) {
-    return path
-  }
-
-  if (typeof path === 'string') {
-    return path.split('.')
-  }
-
-  return [path]
-}
 
 //---------------------------------------------------------
 
@@ -39,16 +27,6 @@ const PropsMatcher = props => (data) => {
     }
   }
   return true
-}
-
-const Matcher = spec => {
-  if (isFunc(spec)) {
-    return spec
-  }
-  const keys = Object.keys(spec)
-  return keys.length === 1
-  ? PropMatcher(keys[0], spec[keys[0]])
-  : PropsMatcher(spec)
 }
 
 //---------------------------------------------------------
@@ -104,7 +82,7 @@ const mapArray = (array, f) => {
 }
 
 const mapProps = (obj, f) => {
-  let ret = obj
+  let ret = obj || {}
 
   for (const key in obj) {
     const val = f(obj[key], key, obj)
@@ -122,7 +100,7 @@ const patch = (data, props) => {
   if (isFunc(props)) return props(data)
   if (!isProps(props)) return props
 
-  let ret = data
+  let ret = data || {}
 
   for (const key in props) {
     const val = patch(ret[key], props[key])
@@ -132,43 +110,70 @@ const patch = (data, props) => {
   return ret
 }
 
-const updatePath = (data, pathParts, update) => {
-  if (pathParts.length === 0) return patch(data, update)
-  if (!data) return data
+//---------------------------------------------------------
 
-  const [part, ...otherParts] = pathParts
+const toPathPart = spec => {
+  if (!spec || typeof spec !== 'object') {
+    return spec
+  }
+  const keys = Object.keys(spec)
+  return keys.length === 1
+  ? PropMatcher(keys[0], spec[keys[0]])
+  : PropsMatcher(spec)
+}
 
-  if (part === '*' || isObject(part)) {
-    const f = (otherParts.length === 0 && isFunc(update))
-      ? update
-      : it => updatePath(it, otherParts, update)
-
-    if (part === '*') {
-      return map(data, f)
-    }
-
-    const check = Matcher(part)
-    return map(data, (v, k, obj) => check(v) ? f(v, k, obj) : v)
+const toPathParts = path => {
+  if (typeof path === 'string') {
+    return path.split('.')
   }
 
-  const val = updatePath(data[part], otherParts, update)
+  if (!isArray(path)) {
+    path = [path]
+  }
+
+  return path.map(toPathPart)
+}
+
+const updatePath = (data, pathParts, pathIndex, update) => {
+  if (pathIndex === pathParts.length) {
+    return patch(data, update)
+  }
+
+  const part = pathParts[pathIndex++]
+
+  if (part === '*' || isFunc(part)) {
+    let f
+
+    if (pathIndex !== pathParts.length) {
+      f = it => updatePath(it, pathParts, pathIndex, update)
+
+    } else if (!isFunc(update)) {
+      f = it => patch(it, update)
+
+    } else {
+      f = update
+    }
+
+    return (part === '*')
+    ? map(data, f)
+    : map(data, (v, k, obj) => part(v) ? f(v, k, obj) : v)
+  }
+
+  const val = updatePath(data[part], pathParts, pathIndex, update)
   return change(part, val, data, data)
 }
 
 export default function update () {
   switch (arguments.length) {
     case 2: return patch(arguments[0], arguments[1])
-    case 3: return updatePath(arguments[0], toPathParts(arguments[1]), arguments[2])
+    case 3: return updatePath(arguments[0], toPathParts(arguments[1]), 0, arguments[2])
     default: throw new TypeError('wrong number of arguments')
   }
 }
 
-export const remove = (data, path) => updatePath(data, toPathParts(path), REMOVE)
+update.where = (path, update) => {
+  const pathParts = toPathParts(path)
+  return data => updatePath(data, pathParts, 0, update)
+}
 
-//---------------------------------------------------------
-
-const fp = f => (...args) => data => f(data, ...args)
-
-update._ = fp(update)
-remove._ = fp(remove)
-
+export const remove = (data, path) => updatePath(data, toPathParts(path), 0, REMOVE)
