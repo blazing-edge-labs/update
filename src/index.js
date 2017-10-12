@@ -84,8 +84,8 @@ const mapArray = (array, f) => {
 const mapProps = (obj, f) => {
   let ret = obj || {}
 
-  for (const key in obj) {
-    const val = f(obj[key], key, obj)
+  for (const key in ret) {
+    const val = f(ret[key], key, obj)
     ret = change(key, val, ret, obj)
   }
 
@@ -138,6 +138,10 @@ const updatePath = (data, pathParts, pathIndex, update) => {
   const part = pathParts[pathIndex++]
 
   if (part === '*' || isFunc(part)) {
+    if (!data) {
+      return data
+    }
+
     let f
 
     if (pathIndex !== pathParts.length) {
@@ -155,8 +159,9 @@ const updatePath = (data, pathParts, pathIndex, update) => {
     : map(data, (v, k, obj) => part(v) ? f(v, k, obj) : v)
   }
 
-  const val = updatePath(data[part], pathParts, pathIndex, update)
-  return change(part, val, data, data)
+  const ret = data || {}
+  const val = updatePath(ret[part], pathParts, pathIndex, update)
+  return change(part, val, ret, data)
 }
 
 export default function update () {
