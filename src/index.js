@@ -8,11 +8,22 @@ const isProps = (x) => {
     return false
   }
   const proto = protoOf(x)
-  return proto && !protoOf(proto)
+  return !!proto && !protoOf(proto)
 }
 
 const clone = data => isArray(data) ? data.slice() : Object.assign({}, data)
-const toPathParts = path => isArray(path) ? path : (path || '').split('.')
+
+const toPathParts = path => {
+  if (isArray(path)) {
+    return path
+  }
+
+  if (typeof path === 'string') {
+    return path.split('.')
+  }
+
+  return [path]
+}
 
 //---------------------------------------------------------
 
@@ -31,37 +42,14 @@ const PropsMatcher = props => (data) => {
 }
 
 const Matcher = spec => {
-  if (isFunc(spec)) return spec
+  if (isFunc(spec)) {
+    return spec
+  }
   const keys = Object.keys(spec)
   return keys.length === 1
-    ? PropMatcher(keys[0], spec[keys[0]])
-    : PropsMatcher(spec)
+  ? PropMatcher(keys[0], spec[keys[0]])
+  : PropsMatcher(spec)
 }
-
-//---------------------------------------------------------
-
-// const findLastIndex = (array, check) => {
-//   let i = array.length
-//   while (i--) {
-//     if (check(array[i])) {
-//       return i
-//     }
-//   }
-//   return null
-// }
-
-// const findKey = (obj, check) => {
-//   for (const key in obj) {
-//     if (check(obj[key])) {
-//       return key
-//     }
-//   }
-//   return null
-// }
-
-// export default function find (data, check) {
-//   return Array.isArray(data) ? findLastIndex(data, check) : findKey(data, check)
-// }
 
 //---------------------------------------------------------
 
@@ -87,34 +75,40 @@ const change = (key, val, data, original) => {
   return target
 }
 
+//---------------------------------------------------------
 
 const mapArray = (array, f) => {
   const n = array.length
-  let cloned
-  let toRemove = false
+  let ret = array
+  let changed = false
+  let c = 0
 
   for (let i = 0; i < n; ++i) {
-    const newVal = f(array[i], i, array)
-    if (newVal !== array[i]) {
-      if (!cloned) cloned = array.slice()
-      cloned[i] = newVal
-      toRemove = toRemove || newVal === REMOVE
+    const val = f(array[i], i, array)
+    if (!changed) {
+      if (val === array[i]) continue
+      ret = array.slice()
+      changed = true
+      c = i
+    }
+    if (val !== REMOVE) {
+      ret[c++] = val
     }
   }
 
-  if (toRemove) {
-    return cloned.filter(it => it !== REMOVE)
+  if (changed && c < n) {
+    ret.length = c
   }
 
-  return cloned || array
+  return ret
 }
 
 const mapProps = (obj, f) => {
   let ret = obj
 
   for (const key in obj) {
-    const newVal = f(obj[key], key, obj)
-    ret = change(key, newVal, ret, obj)
+    const val = f(obj[key], key, obj)
+    ret = change(key, val, ret, obj)
   }
 
   return ret
@@ -139,7 +133,7 @@ const patch = (data, props) => {
 }
 
 const updatePath = (data, pathParts, update) => {
-  if (pathParts.length === 0) return patch(update, data)
+  if (pathParts.length === 0) return patch(data, update)
   if (!data) return data
 
   const [part, ...otherParts] = pathParts
@@ -161,20 +155,12 @@ const updatePath = (data, pathParts, update) => {
   return change(part, val, data, data)
 }
 
-export default function update (data, ...args) {
-  let path, update
-
-  if (args.length === 1) {
-    [update] = args
-  } else {
-    [path, update] = args
+export default function update () {
+  switch (arguments.length) {
+    case 2: return patch(arguments[0], arguments[1])
+    case 3: return updatePath(arguments[0], toPathParts(arguments[1]), arguments[2])
+    default: throw new TypeError('wrong number of arguments')
   }
-
-  if (!path) {
-    return patch(data, update)
-  }
-
-  return updatePath(data, toPathParts(path), update)
 }
 
 export const remove = (data, path) => updatePath(data, toPathParts(path), REMOVE)
