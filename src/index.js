@@ -127,11 +127,7 @@ const toPathParts = path => {
     return path.split('.')
   }
 
-  if (!isArray(path)) {
-    path = [path]
-  }
-
-  return path.map(toPathPart)
+  return isArray(path) ? path.map(toPathPart) : [ toPathPart(path) ]
 }
 
 const updatePath = (data, pathParts, pathIndex, update) => {
@@ -167,7 +163,7 @@ export default function update () {
   switch (arguments.length) {
     case 2: return patch(arguments[0], arguments[1])
     case 3: return updatePath(arguments[0], toPathParts(arguments[1]), 0, arguments[2])
-    default: throw new TypeError('wrong number of arguments')
+    default: throw new TypeError('invalid number of arguments')
   }
 }
 
