@@ -14,7 +14,8 @@ test('patch', t => {
       bc: {
         unchanged: 3,
       },
-      array: [1, 2, 3],
+      arrayReplaced: [1, 2, 3],
+      arrayChanged: [1, 2, 3, 4],
       removed: [],
     },
     instance: new MyClass,
@@ -29,7 +30,14 @@ test('patch', t => {
       bc: {
         unchanged: 3,
       },
-      array: [4, 5, 6],
+      arrayReplaced: [4, 5, 6],
+      arrayChanged: {
+        0: REMOVE,
+        1: 49,
+        2: REMOVE,
+        3: x => -x,
+        4: 94,
+      },
       removed: REMOVE,
       added: { new: true },
     },
@@ -44,7 +52,8 @@ test('patch', t => {
       bc: {
         unchanged: 3,
       },
-      array: [4, 5, 6],
+      arrayReplaced: [4, 5, 6],
+      arrayChanged: [49, -4, 94],
       added: { new: true },
     },
     instance,
@@ -52,7 +61,7 @@ test('patch', t => {
 
   t.is(result.a, data.a, 'same since not in patch')
   t.isNot(result.b, data.b, 'changed object is cloned')
-  t.isNot(result.b.array, data.b.array, 'changed array is cloned')
+  t.isNot(result.b.arrayReplaced, data.b.arrayReplaced, 'changed array is cloned')
   t.is(result.b.bc, data.b.bc, 'same since content is not changed')
   t.is(result.instance, instance, 'handle instances as values')
   t.end()
@@ -89,6 +98,12 @@ test('by path', t => {
     update(data, 'a.b.c.d', REMOVE),
     { a: { b: { c: {} } } },
     'REMOVE'
+  )
+
+  t.same(
+    update({ a: { b: [1, 2] } }, 'a.b.0', REMOVE),
+    { a: { b: [2] } },
+    'REMOVE item in array'
   )
 
   t.same(

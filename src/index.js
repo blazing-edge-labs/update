@@ -3,15 +3,15 @@ const protoOf = Object.getPrototypeOf
 
 const isFunc = z => typeof z === 'function'
 
-const isProps = (x) => {
-  if (!x || typeof x !== 'object') {
+const isProps = (z) => {
+  if (!z || typeof z !== 'object') {
     return false
   }
-  const proto = protoOf(x)
+  const proto = protoOf(z)
   return !!proto && !protoOf(proto)
 }
 
-const clone = data => isArray(data) ? data.slice() : Object.assign({}, data)
+const isIndex = (z) => !/\D/.test(z)
 
 //---------------------------------------------------------
 
@@ -33,60 +33,62 @@ const PropsMatcher = props => (data) => {
 
 export const REMOVE = () => REMOVE
 
-const change = (key, val, data, original) => {
+const INTERNAL = {}
+
+const change = (key, val, data, original, dataIsArray, removeLater) => {
   if (val === data[key] || (val === REMOVE && !(key in data))) {
     return data
   }
 
-  const target = data !== original ? data : clone(original)
-
-  if (val !== REMOVE) {
-    target[key] = val
-
-  } else if (isArray(data)) {
-    target.splice(key, 1)
-
-  } else {
-    delete target[key]
+  if (data === original) {
+    data = dataIsArray ? data.slice() : Object.assign({}, data)
   }
 
-  return target
+  if (val !== REMOVE) {
+    data[key] = val
+
+  } else if (!dataIsArray || !isIndex(key)) {
+    return (delete data[key]) ? data : original
+
+  } else if (removeLater) {
+    data[key] = INTERNAL
+    data._toPurge = INTERNAL
+
+  } else {
+    data.splice(key, 1)
+  }
+
+  return data
+}
+
+const purgeArray = (array) => {
+  if (array._toPurge !== INTERNAL) {
+    return array
+  }
+
+  return array.filter(it => it !== INTERNAL)
 }
 
 //---------------------------------------------------------
 
 const mapArray = (array, f) => {
-  const n = array.length
+  const n =array.length
   let ret = array
-  let changed = false
-  let c = 0
 
   for (let i = 0; i < n; ++i) {
     const val = f(array[i], i, array)
-    if (!changed) {
-      if (val === array[i]) continue
-      ret = array.slice()
-      changed = true
-      c = i
-    }
-    if (val !== REMOVE) {
-      ret[c++] = val
-    }
+    ret = change(i, val, ret, array, true, true)
   }
 
-  if (changed && c < n) {
-    ret.length = c
-  }
-
-  return ret
+  return purgeArray(ret)
 }
 
-const mapProps = (obj, f) => {
-  let ret = obj || {}
+const mapProps = (data, f) => {
+  let ret = data || {}
 
   for (const key in ret) {
-    const val = f(ret[key], key, obj)
-    ret = change(key, val, ret, obj)
+    const val = f(ret[key], key, data)
+    ret = change(key, val, ret, data, false, false)
   }
 
   return ret
@@ -102,24 +104,26 @@ const patch = (data, props) => {
 
   let ret = data || {}
 
+  const dataIsArray = isArray(ret)
+
   for (const key in props) {
     const val = patch(ret[key], props[key])
-    ret = change(key, val, ret, data)
+    ret = change(key, val, ret, data, dataIsArray, true)
   }
 
-  return ret
+  return dataIsArray ? purgeArray(ret) : ret
 }
 
 //---------------------------------------------------------
 
-const toPathPart = spec => {
-  if (!spec || typeof spec !== 'object') {
-    return spec
+const toPathPart = part => {
+  if (!part || typeof part !== 'object') {
+    return part
   }
-  const keys = Object.keys(spec)
+  const keys = Object.keys(part)
   return keys.length === 1
-  ? PropMatcher(keys[0], spec[keys[0]])
-  : PropsMatcher(spec)
+  ? PropMatcher(keys[0], part[keys[0]])
+  : PropsMatcher(part)
 }
 
 const toPathParts = path => {
@@ -161,7 +165,7 @@ const updatePath = (data, pathParts, pathIndex, update) => {
 
   const ret = data || {}
   const val = updatePath(ret[part], pathParts, pathIndex, update)
-  return change(part, val, ret, data)
+  return change(part, val, ret, data, isArray(ret), false)
 }
 
 export default function update () {
