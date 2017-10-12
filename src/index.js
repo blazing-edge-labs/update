@@ -35,7 +35,7 @@ export const REMOVE = () => REMOVE
 
 const INTERNAL = {}
 
-const change = (key, val, data, original, dataIsArray, removeLater) => {
+function change (key, val, data, original, dataIsArray, removeLater) {
   if (val === data[key] || (val === REMOVE && !(key in data))) {
     return data
   }
@@ -61,7 +61,7 @@ const change = (key, val, data, original, dataIsArray, removeLater) => {
   return data
 }
 
-const purgeArray = (array) => {
+function purgeArray (array) {
   if (array._toPurge !== INTERNAL) {
     return array
   }
@@ -71,7 +71,7 @@ const purgeArray = (array) => {
 
 //---------------------------------------------------------
 
-const mapArray = (array, f) => {
+function mapArray (array, f) {
   const n =array.length
   let ret = array
 
@@ -83,7 +83,7 @@ const mapArray = (array, f) => {
   return purgeArray(ret)
 }
 
-const mapProps = (data, f) => {
+function mapProps (data, f) {
   let ret = data || {}
 
   for (const key in ret) {
@@ -98,7 +98,7 @@ export const map = (data, f) => isArray(data) ? mapArray(data, f) : mapProps(dat
 
 //---------------------------------------------------------
 
-const patch = (data, props) => {
+function patch (data, props) {
   if (isFunc(props)) return props(data)
   if (!isProps(props)) return props
 
@@ -116,7 +116,7 @@ const patch = (data, props) => {
 
 //---------------------------------------------------------
 
-const toPathPart = part => {
+function toPathPart (part) {
   if (!part || typeof part !== 'object') {
     return part
   }
@@ -126,7 +126,7 @@ const toPathPart = part => {
   : PropsMatcher(part)
 }
 
-const toPathParts = path => {
+function toPathParts (path) {
   if (typeof path === 'string') {
     return path.split('.')
   }
@@ -134,7 +134,7 @@ const toPathParts = path => {
   return isArray(path) ? path.map(toPathPart) : [ toPathPart(path) ]
 }
 
-const updatePath = (data, pathParts, pathIndex, update) => {
+function updatePath (data, pathParts, pathIndex, update) {
   if (pathIndex === pathParts.length) {
     return patch(data, update)
   }
