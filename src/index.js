@@ -33,8 +33,6 @@ const PropsMatcher = props => (data) => {
 
 export const REMOVE = () => REMOVE
 
-const INTERNAL = {}
-
 function change (key, val, data, original, dataIsArray, removeLater) {
   if (val === data[key] || (val === REMOVE && !(key in data))) {
     return data
@@ -44,29 +42,32 @@ function change (key, val, data, original, dataIsArray, removeLater) {
     data = dataIsArray ? data.slice() : Object.assign({}, data)
   }
 
-  if (val !== REMOVE) {
+  if (val !== REMOVE || removeLater && dataIsArray) {
     data[key] = val
 
-  } else if (!dataIsArray || !isIndex(key)) {
-    return (delete data[key]) ? data : original
-
-  } else if (removeLater) {
-    data[key] = INTERNAL
-    data._toPurge = INTERNAL
+  } else if (dataIsArray && isIndex(key)) {
+    data.splice(key, 1)
 
   } else {
-    data.splice(key, 1)
+    delete data[key]
   }
 
   return data
 }
 
 function purgeArray (array) {
-  if (array._toPurge !== INTERNAL) {
-    return array
+  let i = array.indexOf(REMOVE)
+  if (i === -1) return array
+
+  const n = array.length
+
+  for (let j = i + 1; j < n; ++j) {
+    if (array[j] !== REMOVE) {
+      array[i++] = array[j]
+    }
   }
 
-  return array.filter(it => it !== INTERNAL)
+  array.length = i
 }
 
 //---------------------------------------------------------
@@ -80,7 +81,11 @@ function mapArray (array, f) {
     ret = change(i, val, ret, array, true, true)
   }
 
-  return purgeArray(ret)
+  if (ret !== array) {
+    purgeArray(ret)
+  }
+
+  return ret
 }
 
 function mapProps (data, f) {
@@ -111,7 +116,11 @@ function patch (data, props) {
     ret = change(key, val, ret, data, dataIsArray, true)
   }
 
-  return dataIsArray ? purgeArray(ret) : ret
+  if (dataIsArray && ret !== data) {
+    purgeArray(ret)
+  }
+
+  return ret
 }
 
 //---------------------------------------------------------
