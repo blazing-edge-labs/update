@@ -42,11 +42,16 @@ function change (key, val, data, original, dataIsArray, removeLater) {
     data = dataIsArray ? data.slice() : Object.assign({}, data)
   }
 
-  if (val !== REMOVE || removeLater && dataIsArray) {
+  if (val !== REMOVE) {
     data[key] = val
 
-  } else if (dataIsArray && isIndex(key)) {
-    data.splice(key, 1)
+  } else if (dataIsArray) {
+    if (!isIndex(key)) return data
+
+    if (removeLater)
+      data[key] = REMOVE
+    else
+      data.splice(key, 1)
 
   } else {
     delete data[key]
