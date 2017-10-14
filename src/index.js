@@ -93,18 +93,22 @@ function mapArray (array, f) {
   return ret
 }
 
-function mapProps (data, f) {
-  let ret = data || {}
+function mapProps (data, keys, f) {
+  const dataIsArray = isArray(data)
 
-  for (const key in ret) {
-    const val = f(ret[key], key, data)
-    ret = change(key, val, ret, data, false, false)
+  const ret = keys.reduce((acc, key) => {
+    const val = f(data[key], key, data)
+    return change(key, val, acc, data, dataIsArray, true)
+  }, data)
+
+  if (dataIsArray && ret !== data) {
+    purgeArray(ret)
   }
 
   return ret
 }
 
-export const map = (data, f) => isArray(data) ? mapArray(data, f) : mapProps(data, f)
+export const map = (data, f) => isArray(data) ? mapArray(data, f) : mapProps(data, Object.keys(data), f)
 
 //---------------------------------------------------------
 
@@ -131,7 +135,7 @@ function patch (data, props) {
 //---------------------------------------------------------
 
 function toPathPart (part) {
-  if (!part || typeof part !== 'object') {
+  if (!part || typeof part !== 'object' || isArray(part)) {
     return part
   }
   const keys = Object.keys(part)
@@ -155,7 +159,7 @@ function updatePath (data, pathParts, pathIndex, update) {
 
   const part = pathParts[pathIndex++]
 
-  if (part === '*' || isFunc(part)) {
+  if (part === '*' || isFunc(part) || isArray(part)) {
     if (!data) {
       return data
     }
@@ -172,9 +176,15 @@ function updatePath (data, pathParts, pathIndex, update) {
       f = update
     }
 
-    return (part === '*')
-    ? map(data, f)
-    : map(data, (v, k, obj) => part(v) ? f(v, k, obj) : v)
+    if (part === '*') {
+      return map(data, f)
+
+    } else if (isFunc(part)) {
+      return map(data, (v, k, obj) => part(v) ? f(v, k, obj) : v)
+
+    } else {
+      return mapProps(data, part, f)
+    }
   }
 
   const ret = data || {}

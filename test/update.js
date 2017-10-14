@@ -219,6 +219,16 @@ test('filtering', t => {
     ],
   })
 
+
+  result = update(data, ['list', [1, 2]], REMOVE)
+
+  t.same(result, {
+    list: [
+      { id: 1, count: 1, active: false, user: { name: 'Alex' } },
+      { id: 4, count: 0, active: false, user: { name: 'Alex' } },
+    ],
+  })
+
   t.end()
 })
 
