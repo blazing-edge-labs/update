@@ -1,7 +1,7 @@
 const { isArray } = Array
 const protoOf = Object.getPrototypeOf
 
-const isFunc = z => typeof z === 'function'
+const isFunc = (z) => typeof z === 'function'
 
 const isProps = (z) => {
   if (!z || typeof z !== 'object') {
@@ -78,7 +78,7 @@ function purgeArray (array) {
 //---------------------------------------------------------
 
 function mapArray (array, f) {
-  const n =array.length
+  const n = array.length
   let ret = array
 
   for (let i = 0; i < n; ++i) {
