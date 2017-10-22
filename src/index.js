@@ -135,7 +135,7 @@ function patch (data, props) {
 //---------------------------------------------------------
 
 function toPathPart (part) {
-  if (!part || typeof part !== 'object' || isArray(part)) {
+  if (!isProps(part)) {
     return part
   }
   const keys = Object.keys(part)
@@ -199,10 +199,3 @@ export default function update () {
     default: throw new TypeError('invalid number of arguments')
   }
 }
-
-update.where = (path, update) => {
-  const pathParts = toPathParts(path)
-  return data => updatePath(data, pathParts, 0, update)
-}
-
-export const remove = (data, path) => updatePath(data, toPathParts(path), 0, REMOVE)
