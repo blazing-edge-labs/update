@@ -1,19 +1,23 @@
 {
   "name": "deep-update",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "Utility for immutable deep updates of objects.",
   "main": "lib",
   "scripts": {
     "lint": "eslint ./src",
     "test": "tape -r babel-register 'test/*.js'",
-    "build": "babel src -d lib"
+    "build": "babel src -d lib",
+    "preversion": "npm run test && npm run build"
   },
   "engines": {
     "node": "8"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rkatic/update.git"
+    "url": "git+https://github.com/blazing-edge-labs/update.git"
+  },
+  "bugs": {
+    "url": "https://github.com/blazing-edge-labs/update/issues"
   },
   "keywords": [
     "update",
