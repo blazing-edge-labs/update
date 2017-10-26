@@ -138,7 +138,11 @@ function toPathParts (path) {
     return path.replace(/\]/g, '').split(/[.[]/).map(replaceStarWithALL)
   }
 
-  return isArray(path) ? path.map(toPathPart) : [ toPathPart(path) ]
+  if (!isArray(path)) {
+    throw new TypeError('path is not string nor array')
+  }
+
+  return path.map(toPathPart)
 }
 
 function updatePath (data, pathParts, pathIndex, update) {
@@ -149,21 +153,11 @@ function updatePath (data, pathParts, pathIndex, update) {
   const part = pathParts[pathIndex++]
 
   if (isFunc(part) || isArray(part)) {
-    if (!data) {
-      return data
-    }
+    if (!data) return data
 
-    let f
-
-    if (pathIndex !== pathParts.length) {
-      f = it => updatePath(it, pathParts, pathIndex, update)
-
-    } else if (!isFunc(update)) {
-      f = it => patch(it, update)
-
-    } else {
-      f = update
-    }
+    const f = (pathIndex === pathParts.length && isFunc(update))
+      ? update
+      : it => updatePath(it, pathParts, pathIndex, update)
 
     if (part === ALL) {
       return map(data, f)
