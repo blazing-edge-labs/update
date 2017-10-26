@@ -11,8 +11,6 @@ const isProps = (z) => {
   return !!proto && !protoOf(proto)
 }
 
-const isIndex = (z) => !/\D/.test(z)
-
 //---------------------------------------------------------
 
 const PropMatcher = (key, value) => data => !!data && data[key] === value
@@ -34,7 +32,7 @@ const PropsMatcher = props => (data) => {
 export const REMOVE = () => REMOVE
 
 function change (key, val, data, original, dataIsArray, removeLater) {
-  if (val === data[key] || (val === REMOVE && !(key in data))) {
+  if (val === data[key] || val === REMOVE && !dataIsArray && !(key in data)) {
     return data
   }
 
@@ -42,16 +40,11 @@ function change (key, val, data, original, dataIsArray, removeLater) {
     data = dataIsArray ? data.slice() : Object.assign({}, data)
   }
 
-  if (val !== REMOVE) {
+  if (val !== REMOVE || removeLater) {
     data[key] = val
 
   } else if (dataIsArray) {
-    if (!isIndex(key)) return data
-
-    if (removeLater)
-      data[key] = REMOVE
-    else
-      data.splice(key, 1)
+    data.splice(key, 1)
 
   } else {
     delete data[key]
@@ -98,7 +91,7 @@ function mapProps (data, keys, f) {
 
   const ret = keys.reduce((acc, key) => {
     const val = f(data[key], key, data)
-    return change(key, val, acc, data, dataIsArray, true)
+    return change(key, val, acc, data, dataIsArray, dataIsArray)
   }, data)
 
   if (dataIsArray && ret !== data) {
@@ -122,7 +115,7 @@ function patch (data, props) {
 
   for (const key in props) {
     const val = patch(ret[key], props[key])
-    ret = change(key, val, ret, data, dataIsArray, true)
+    ret = change(key, val, ret, data, dataIsArray, dataIsArray)
   }
 
   if (dataIsArray && ret !== data) {
