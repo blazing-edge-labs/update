@@ -11,6 +11,8 @@ Yet another utility for immutable object updates.
 ## Usage
 
 ```js
+import update from 'rkatic-update'
+
 const newState = update(state, 'path.to.users[7].balance', {
   email: 'some.email@example.com',
   balance: {
