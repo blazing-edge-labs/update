@@ -55,3 +55,41 @@ update(state, 'path.to.playersById', {
   }
 })
 ```
+
+### Path with "**`*`**"
+
+To apply a change to all values of an array/object, we can use "**`*`**".
+
+```js
+update(state, 'path.to.users[*].data.balance', n => n + 100)
+
+update(state, 'path.to.users[*]', (user, index) => {
+  // Removing every second user
+  if (index % 2 === 0) {
+    return REMOVE
+  }
+  // Mark others as lucky and double the balance amount
+  return update(user, {
+    lucky: true,
+    balance: {
+      amount: n => n * 2
+    }
+  })
+})
+```
+
+### Advanced paths
+
+When path is passed as an array, it can also contain "filters" to selectively change values of an array/object.
+
+```js
+update(state, ['path', 'to', 'users', { lucky: true }, 'balance'], {
+  limit: REMOVE,
+  amount: n => n + 1000
+})
+```
+
+A filter can be a:
+  * function: `user => user.lucky`,
+  * plain object with required values: `{ lucky: true }` (use `{}` for "all"),
+  * array of indexes/keys: `[2, 4, 6, 8]`
