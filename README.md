@@ -4,7 +4,22 @@
 
 Yet another utility for immutable object updates.
 
-See [article](https://blog.blazingedge.io/immutable-update/) for examples.
+## Installation
+
+`npm install rkatic-update --save`
+
+## Usage
+
+```js
+const newState = update(state, 'path.to.users[7].balance', {
+  email: 'some.email@example.com',
+  balance: {
+    amount: n => n + 100
+  }
+})
+```
+
+More examples in the [article](https://blog.blazingedge.io/immutable-update/).
 
 ## API
 
@@ -22,5 +37,5 @@ Updated data. When no effective changes are made, returns the same `data`.
 
 ### `REMOVE`
 
-Special value to use in a **change** to remove all or part of **data**.
+Special value to use in a **change** to remove part(s) of **data**.
 
