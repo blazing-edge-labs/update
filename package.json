@@ -1,5 +1,5 @@
 {
-  "name": "rkatic-update",
+  "name": "@blazingedge/update",
   "version": "1.0.0",
   "description": "Utility for immutable deep updates of objects.",
   "main": "lib",
@@ -11,7 +11,7 @@
     "postversion": "git push && git push --tags"
   },
   "engines": {
-    "node": "8"
+    "node": ">=7"
   },
   "repository": {
     "type": "git",
@@ -27,9 +27,9 @@
     "utiity",
     "reducers"
   ],
-  "author": "Robert Katić",
+  "author": "Blazing Edge",
   "license": "MIT",
-  "homepage": "https://github.com/rkatic/update#readme",
+  "homepage": "https://blog.blazingedge.io",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
