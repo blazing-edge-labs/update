@@ -71,13 +71,13 @@ test('by path', t => {
   const data = { a: { b: { c: { d: 1 } } } }
 
   t.same(
-    update(data, 'a.b.c.d', 2),
+    update(data, 'a.b[c].d', 2),
     { a: { b: { c: { d: 2 } } } },
     'set value'
   )
 
   t.same(
-    update({ a: { b: {} } }, 'a.b.c.d', 2),
+    update({ a: { b: {} } }, 'a.b.c[d]', 2),
     { a: { b: { c: { d: 2 } } } },
     'set value creating missing objects'
   )

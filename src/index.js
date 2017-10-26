@@ -139,7 +139,7 @@ function toPathPart (part) {
 
 function toPathParts (path) {
   if (typeof path === 'string') {
-    return path.split('.')
+    return path.replace(/\]/g, '').split(/[.[]/)
   }
 
   return isArray(path) ? path.map(toPathPart) : [ toPathPart(path) ]
