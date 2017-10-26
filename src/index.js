@@ -127,6 +127,10 @@ function patch (data, props) {
 
 //---------------------------------------------------------
 
+export const ALL = () => ALL
+
+const replaceStarWithALL = (z) => z === '*' ? ALL : z
+
 function toPathPart (part) {
   if (!isProps(part)) {
     return part
@@ -139,7 +143,7 @@ function toPathPart (part) {
 
 function toPathParts (path) {
   if (typeof path === 'string') {
-    return path.replace(/\]/g, '').split(/[.[]/)
+    return path.replace(/\]/g, '').split(/[.[]/).map(replaceStarWithALL)
   }
 
   return isArray(path) ? path.map(toPathPart) : [ toPathPart(path) ]
@@ -152,7 +156,7 @@ function updatePath (data, pathParts, pathIndex, update) {
 
   const part = pathParts[pathIndex++]
 
-  if (part === '*' || isFunc(part) || isArray(part)) {
+  if (isFunc(part) || isArray(part)) {
     if (!data) {
       return data
     }
@@ -169,7 +173,7 @@ function updatePath (data, pathParts, pathIndex, update) {
       f = update
     }
 
-    if (part === '*') {
+    if (part === ALL) {
       return map(data, f)
 
     } else if (isFunc(part)) {
