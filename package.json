@@ -5,7 +5,7 @@
   "main": "lib",
   "scripts": {
     "lint": "eslint ./src",
-    "test": "tape -r babel-register 'test/*.js'",
+    "test": "npm run lint && tape -r babel-register 'test/*.js'",
     "build": "npm run test && babel src -d lib"
   },
   "engines": {
