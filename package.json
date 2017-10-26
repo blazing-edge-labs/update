@@ -1,5 +1,5 @@
 {
-  "name": "deep-update",
+  "name": "rkatic-update",
   "version": "0.0.5",
   "description": "Utility for immutable deep updates of objects.",
   "main": "lib",
