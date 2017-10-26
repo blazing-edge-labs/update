@@ -78,7 +78,7 @@ update(state, 'path.to.users[*]', (user, index) => {
 })
 ```
 
-### Advanced paths
+### Path as Array
 
 When path is passed as an array, it can also contain "filters" to selectively change values of an array/object.
 
