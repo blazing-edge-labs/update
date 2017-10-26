@@ -13,22 +13,6 @@ const isProps = (z) => {
 
 //---------------------------------------------------------
 
-const PropMatcher = (key, value) => data => !!data && data[key] === value
-
-const PropsMatcher = props => (data) => {
-  if (!data) {
-    return false
-  }
-  for (const key in props) {
-    if (props[key] !== data[key]) {
-      return false
-    }
-  }
-  return true
-}
-
-//---------------------------------------------------------
-
 export const REMOVE = () => REMOVE
 
 function change (key, val, data, original, dataIsArray, removeLater) {
@@ -127,18 +111,26 @@ function patch (data, props) {
 
 //---------------------------------------------------------
 
-export const ALL = () => ALL
+export const ALL = () => true
 
 const replaceStarWithALL = (z) => z === '*' ? ALL : z
+
+const PropMatcher = (key, value) => data => !!data && data[key] === value
+
+const PropsMatcher = (keys, props) => (data) => {
+  return !!data && keys.every(key => props[key] === data[key])
+}
 
 function toPathPart (part) {
   if (!isProps(part)) {
     return part
   }
   const keys = Object.keys(part)
-  return keys.length === 1
-  ? PropMatcher(keys[0], part[keys[0]])
-  : PropsMatcher(part)
+  switch (keys.length) {
+    case 0: return ALL
+    case 1: return PropMatcher(keys[0], part[keys[0]])
+    default: return PropsMatcher(keys, part)
+  }
 }
 
 function toPathParts (path) {
