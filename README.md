@@ -13,7 +13,7 @@ Yet another utility for immutable object updates.
 ```js
 import update from 'rkatic-update'
 
-const newState = update(state, 'path.to.users[7].balance', {
+const newState = update(state, 'path.to.users[7].data', {
   email: 'some.email@example.com',
   balance: {
     amount: n => n + 100
@@ -41,3 +41,17 @@ Updated data. When no effective changes are made, returns the same `data`.
 
 Special value to use in a **change** to remove part(s) of **data**.
 
+```js
+import update, { REMOVE } from 'rkatic-update'
+
+// Remove entire player
+update(state, 'path.to.playersById[7]', REMOVE)
+
+// Removing and setting
+update(state, 'path.to.playersById', {
+  [killedPlayerId]: REMOVE,
+  [killedBy]: {
+    kills: n => n + 1,
+  }
+})
+```
