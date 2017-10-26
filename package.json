@@ -1,6 +1,6 @@
 {
   "name": "deep-update",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Utility for immutable deep updates of objects.",
   "main": "lib",
   "scripts": {
