@@ -6,12 +6,12 @@ Yet another utility for immutable object updates.
 
 ## Installation
 
-`npm install rkatic-update --save`
+`npm install @blazingedge/update --save`
 
 ## Usage
 
 ```js
-import update from 'rkatic-update'
+import update from '@blazingedge/update'
 
 const newState = update(state, 'path.to.users[7].data', {
   email: 'some.email@example.com',
@@ -42,7 +42,7 @@ Updated data. When no effective changes are made, returns the same `data`.
 Special value to use in a **change** to remove part(s) of **data**.
 
 ```js
-import update, { REMOVE } from 'rkatic-update'
+import update, { REMOVE } from '@blazingedge/update'
 
 // Remove entire player
 update(state, 'path.to.playersById[7]', REMOVE)
