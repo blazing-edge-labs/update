@@ -1,6 +1,6 @@
 {
   "name": "deep-update",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Utility for immutable deep updates of objects.",
   "main": "lib",
   "scripts": {
@@ -17,7 +17,7 @@
     "url": "git+https://github.com/blazing-edge-labs/update.git"
   },
   "bugs": {
-    "url": "https://github.com/blazing-edge-labs/update/issues"
+    "url": "https://github.com/rkatic/update/issues"
   },
   "keywords": [
     "update",
@@ -28,9 +28,6 @@
   ],
   "author": "Robert Katić",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/rkatic/update/issues"
-  },
   "homepage": "https://github.com/rkatic/update#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
