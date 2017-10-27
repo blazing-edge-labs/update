@@ -7,7 +7,6 @@
     "lint": "eslint ./src",
     "test": "npm run lint && tape -r babel-register 'test/*.js'",
     "build": "npm run test && babel src -d lib",
-    "preversion": "npm run build",
     "postversion": "git push && git push --tags"
   },
   "engines": {
@@ -24,7 +23,7 @@
     "update",
     "deep",
     "immutable",
-    "utiity",
+    "utility",
     "reducers"
   ],
   "author": "Blazing Edge",
