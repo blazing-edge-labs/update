@@ -59,8 +59,7 @@ function mapArray (array, f) {
   let ret = array
 
   for (let i = 0; i < n; ++i) {
-    const val = f(array[i], i, array)
-    ret = change(i, val, ret, array, true, true)
+    ret = change(i, f(array[i]), ret, array, true, true)
   }
 
   if (ret !== array) {
@@ -74,8 +73,7 @@ function mapProps (data, keys, f) {
   const dataIsArray = isArray(data)
 
   const ret = keys.reduce((acc, key) => {
-    const val = f(data[key], key, data)
-    return change(key, val, acc, data, dataIsArray, dataIsArray)
+    return change(key, f(data[key]), acc, data, dataIsArray, dataIsArray)
   }, data)
 
   if (dataIsArray && ret !== data) {
@@ -163,7 +161,7 @@ function updatePath (data, pathParts, pathIndex, update) {
       return map(data, f)
 
     } else if (isFunc(part)) {
-      return map(data, (v, k, obj) => part(v) ? f(v, k, obj) : v)
+      return map(data, (v) => part(v) ? f(v) : v)
 
     } else {
       return mapProps(data, part, f)

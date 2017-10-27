@@ -141,25 +141,17 @@ test('asterix', t => {
     },
   }
 
-  let result = update(data, 'a.b.*', (val, i, obj) => {
-    t.is(i, val.id, 'index is passed')
-    t.is(obj, data.a.b)
-    return i
-  })
+  let result = update(data, 'a.b.*', it => it.id)
 
   t.same(result.a.b, [0, 1])
   t.is(result.a.c, data.a.c)
 
 
-  result = update(data, 'a.*.*', (val, i, obj) => {
-    t.is(i, val.id, 'index is passed')
-    if (obj === data.a.b) return val
-    if (i === 0) return REMOVE
-    return i
-  })
+  let i = 0
+  result = update(data, 'a.*.*', it => i++ === 2 ? it.id : it)
 
   t.is(result.a.b, data.a.b, 'array unchanged if no changes to items ')
-  t.same(result.a.c, [1])
+  t.same(result.a.c, [0, {id: 1}])
 
 
   result = update(data, 'a.b.*.id', id => id + 1)

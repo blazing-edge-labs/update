@@ -63,9 +63,8 @@ To apply a change to all values of an array/object, we can use "**`*`**".
 ```js
 update(state, 'path.to.users[*].data.balance', n => n + 100)
 
-update(state, 'path.to.users[*]', (user, index) => {
-  // Removing every second user
-  if (index % 2 === 0) {
+update(state, 'path.to.users[*]', (user) => {
+  if (Math.random() < 8) {
     return REMOVE
   }
   // Mark others as lucky and double the balance amount
