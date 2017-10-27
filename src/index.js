@@ -91,7 +91,7 @@ function patch (data, props) {
   if (isFunc(props)) return props(data)
   if (!isProps(props)) return props
 
-  let ret = data || {}
+  let ret = data
 
   const dataIsArray = isArray(ret)
 
@@ -164,7 +164,7 @@ function updatePath (data, pathParts, pathIndex, update) {
     part = part[0]
 
   } else if (partIsArray || isFunc(part)) {
-    if (!data) return data
+    if (!data && !partIsArray) return data
 
     const f = (pathIndex + 1 === pathParts.length && isFunc(update))
       ? update
@@ -181,9 +181,8 @@ function updatePath (data, pathParts, pathIndex, update) {
     }
   }
 
-  const ret = data || {}
-  const val = updatePath(ret[part], pathParts, pathIndex + 1, update)
-  return change(part, val, ret, data, isArray(ret), false)
+  const val = updatePath(data[part], pathParts, pathIndex + 1, update)
+  return change(part, val, data, data, isArray(data), false)
 }
 
 export default function update () {

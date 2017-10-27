@@ -39,7 +39,6 @@ test('patch', t => {
         4: 94,
       },
       removed: REMOVE,
-      added: { new: true },
     },
     instance,
   })
@@ -54,7 +53,6 @@ test('patch', t => {
       },
       arrayReplaced: [4, 5, 6],
       arrayChanged: [49, -4, 94],
-      added: { new: true },
     },
     instance,
   })
@@ -74,12 +72,6 @@ test('by path', t => {
     update(data, 'a.b[c].d', 2),
     { a: { b: { c: { d: 2 } } } },
     'set value'
-  )
-
-  t.same(
-    update({ a: { b: {} } }, 'a.b.c[d]', 2),
-    { a: { b: { c: { d: 2 } } } },
-    'set value creating missing objects'
   )
 
   t.same(
