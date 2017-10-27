@@ -111,8 +111,6 @@ function patch (data, props) {
 
 export const ALL = () => true
 
-const replaceStarWithALL = (z) => z === '*' ? ALL : z
-
 const PropMatcher = (key, value) => data => !!data && data[key] === value
 
 const PropsMatcher = (keys, props) => (data) => {
@@ -131,9 +129,20 @@ function toPathPart (part) {
   }
 }
 
+function parsePart (part) {
+  if (part[0] === '[') {
+    if (part.indexOf(']') !== part.length - 1) {
+      throw new Error('invalid or missing "]"')
+    }
+    part = part.slice(1, -1)
+  }
+  if (part === '*') return ALL
+  return part
+}
+
 function toPathParts (path) {
   if (typeof path === 'string') {
-    return path.replace(/\]/g, '').split(/[.[]/).map(replaceStarWithALL)
+    return path.replace(/\[/g, '.[').split('.').map(parsePart)
   }
 
   if (!isArray(path)) {
