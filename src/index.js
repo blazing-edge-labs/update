@@ -148,9 +148,13 @@ function updatePath (data, pathParts, pathIndex, update) {
     return patch(data, update)
   }
 
-  const part = pathParts[pathIndex]
+  let part = pathParts[pathIndex]
+  const partIsArray = isArray(part)
 
-  if (isFunc(part) || isArray(part)) {
+  if (partIsArray && part.length === 1) {
+    part = part[0]
+
+  } else if (partIsArray || isFunc(part)) {
     if (!data) return data
 
     const f = (pathIndex + 1 === pathParts.length && isFunc(update))
@@ -160,11 +164,11 @@ function updatePath (data, pathParts, pathIndex, update) {
     if (part === ALL) {
       return map(data, f)
 
-    } else if (isFunc(part)) {
-      return map(data, (v) => part(v) ? f(v) : v)
-
-    } else {
+    } else if (partIsArray) {
       return mapProps(data, part, f)
+
+    } else { // part is a function
+      return map(data, (v) => part(v) ? f(v) : v)
     }
   }
 
