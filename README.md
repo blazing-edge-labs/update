@@ -13,7 +13,7 @@ Yet another utility for immutable object updates.
 ```js
 import update from '@blazingedge/update'
 
-const newState = update(state, 'path.to.users[7].data', {
+const newState = update(state, 'path.to.users[7]', {
   email: 'some.email@example.com',
   balance: {
     amount: n => n + 100
@@ -61,10 +61,10 @@ update(state, 'path.to.playersById', {
 To apply a change to all values of an array/object, we can use "**`*`**".
 
 ```js
-update(state, 'path.to.users[*].data.balance', n => n + 100)
+update(state, 'path.to.users[*].balance', n => n + 100)
 
 update(state, 'path.to.users[*]', (user) => {
-  if (Math.random() < 8) {
+  if (Math.random() < 0.8) {
     return REMOVE
   }
   // Mark others as lucky and double the balance amount
