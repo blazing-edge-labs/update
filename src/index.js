@@ -91,9 +91,8 @@ function patch (data, props) {
   if (isFunc(props)) return props(data)
   if (!isProps(props)) return props
 
+  const dataIsArray = isArray(data)
   let ret = data
-
-  const dataIsArray = isArray(ret)
 
   for (const key in props) {
     const val = patch(ret[key], props[key])
@@ -164,21 +163,20 @@ function updatePath (data, pathParts, pathIndex, update) {
     part = part[0]
 
   } else if (partIsArray || isFunc(part)) {
-    if (!data && !partIsArray) return data
-
     const f = (pathIndex + 1 === pathParts.length && isFunc(update))
       ? update
       : it => updatePath(it, pathParts, pathIndex + 1, update)
 
-    if (part === ALL) {
-      return map(data, f)
-
-    } else if (partIsArray) {
+    if (partIsArray) {
       return mapProps(data, part, f)
-
-    } else { // part is a function
-      return map(data, (v) => part(v) ? f(v) : v)
     }
+
+    // part is a filter function
+    if (!data) return data
+
+    return part === ALL
+      ? map(data, f)
+      : map(data, (v) => part(v) ? f(v) : v)
   }
 
   const val = updatePath(data[part], pathParts, pathIndex + 1, update)
