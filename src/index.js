@@ -106,7 +106,7 @@ function patch (data, props) {
 
 //---------------------------------------------------------
 
-export const ALL = () => true
+const ALL = () => true
 
 const PropMatcher = (key, value) => data => !!data && data[key] === value
 
