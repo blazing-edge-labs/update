@@ -15,7 +15,7 @@ const isProps = (z) => {
 
 export const REMOVE = () => REMOVE
 
-function change (key, val, data, original, dataIsArray, removeLater) {
+function applyChange (key, val, data, original, dataIsArray, removeLater) {
   if (val === data[key] || val === REMOVE && !dataIsArray && !(key in data)) {
     return data
   }
@@ -59,7 +59,7 @@ function mapArray (array, f) {
   let ret = array
 
   for (let i = 0; i < n; ++i) {
-    ret = change(i, f(array[i]), ret, array, true, true)
+    ret = applyChange(i, f(array[i]), ret, array, true, true)
   }
 
   if (ret !== array) {
@@ -73,7 +73,7 @@ function mapProps (data, keys, f) {
   const dataIsArray = isArray(data)
 
   const ret = keys.reduce((acc, key) => {
-    return change(key, f(data[key]), acc, data, dataIsArray, dataIsArray)
+    return applyChange(key, f(data[key]), acc, data, dataIsArray, dataIsArray)
   }, data)
 
   if (dataIsArray && ret !== data) {
@@ -96,7 +96,7 @@ function patch (data, props) {
 
   for (const key in props) {
     const val = patch(ret[key], props[key])
-    ret = change(key, val, ret, data, dataIsArray, dataIsArray)
+    ret = applyChange(key, val, ret, data, dataIsArray, dataIsArray)
   }
 
   if (dataIsArray && ret !== data) {
@@ -112,8 +112,9 @@ export const ALL = () => true
 
 const PropMatcher = (key, value) => data => !!data && data[key] === value
 
-const PropsMatcher = (keys, props) => (data) => {
-  return !!data && keys.every(key => props[key] === data[key])
+function PropsMatcher (keys, props) {
+  const check = function (key) { return props[key] === this[key] }
+  return data => !!data && keys.every(check, data)
 }
 
 function toPathPart (part) {
@@ -180,7 +181,7 @@ function updatePath (data, pathParts, pathIndex, update) {
   }
 
   const val = updatePath(data[part], pathParts, pathIndex + 1, update)
-  return change(part, val, data, data, isArray(data), false)
+  return applyChange(part, val, data, data, isArray(data), false)
 }
 
 export default function update () {
