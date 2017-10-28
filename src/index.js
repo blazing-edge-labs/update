@@ -3,13 +3,8 @@ const protoOf = Object.getPrototypeOf
 
 const isFunc = (z) => typeof z === 'function'
 
-const isProps = (z) => {
-  if (!z || typeof z !== 'object') {
-    return false
-  }
-  const proto = protoOf(z)
-  return !!proto && !protoOf(proto)
-}
+const isProps = (z) => typeof z === 'object'
+  && z !== null && !protoOf(protoOf(z) || {})
 
 //---------------------------------------------------------
 
@@ -83,7 +78,10 @@ function mapProps (data, keys, f) {
   return ret
 }
 
-export const map = (data, f) => isArray(data) ? mapArray(data, f) : mapProps(data, Object.keys(data), f)
+const map = (data, f) =>
+  isArray(data)
+    ? mapArray(data, f)
+    : mapProps(data, Object.keys(data), f)
 
 //---------------------------------------------------------
 
@@ -95,7 +93,7 @@ function patch (data, props) {
   let ret = data
 
   for (const key in props) {
-    const val = patch(ret[key], props[key])
+    const val = patch(data[key], props[key])
     ret = applyChange(key, val, ret, data, dataIsArray, dataIsArray)
   }
 
@@ -152,27 +150,22 @@ function toPathParts (path) {
   return path.map(toPathPart)
 }
 
-function updatePath (data, pathParts, pathIndex, update) {
-  if (pathIndex === pathParts.length) {
-    return patch(data, update)
-  }
+function updatePath (data, parts, index, change) {
+  if (index === parts.length) return patch(data, change)
 
-  let part = pathParts[pathIndex]
+  let part = parts[index++]
   const partIsArray = isArray(part)
 
   if (partIsArray && part.length === 1) {
     part = part[0]
 
   } else if (partIsArray || isFunc(part)) {
-    const f = (pathIndex + 1 === pathParts.length && isFunc(update))
-      ? update
-      : it => updatePath(it, pathParts, pathIndex + 1, update)
+    const f = (index === parts.length && isFunc(change))
+      ? change
+      : it => updatePath(it, parts, index, change)
 
-    if (partIsArray) {
-      return mapProps(data, part, f)
-    }
+    if (partIsArray) return mapProps(data, part, f)
 
-    // part is a filter function
     if (!data) return data
 
     return part === ALL
@@ -180,7 +173,7 @@ function updatePath (data, pathParts, pathIndex, update) {
       : map(data, (v) => part(v) ? f(v) : v)
   }
 
-  const val = updatePath(data[part], pathParts, pathIndex + 1, update)
+  const val = updatePath(data[part], parts, index, change)
   return applyChange(part, val, data, data, isArray(data), false)
 }
 
