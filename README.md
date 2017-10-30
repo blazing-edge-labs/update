@@ -59,12 +59,12 @@ update(state, 'path.to.playersById', {
 })
 ```
 
-### Path with "**`*`**"
+### Path with "**\***"
 
-To apply a change to all values of an array/object, we can use "**`*`**".
+To apply a change to all values of an array/object, we can use "**\***".
 
 ```js
-update(state, 'path.to.users[*].balance', n => n + 100)
+update(state, 'path.to.users[*].balance.amount', n => n + 100)
 
 update(state, 'path.to.users[*]', (user) => {
   if (Math.random() < 0.8) {
