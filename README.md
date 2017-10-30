@@ -19,8 +19,8 @@ const newState = update(state, 'path.to.users[7]', {
     amount: n => n + 100
   }
 })
-```
 
+```
 More examples in the [article](https://blog.blazingedge.io/immutable-update/).
 
 ## API
@@ -32,6 +32,9 @@ More examples in the [article](https://blog.blazingedge.io/immutable-update/).
 * **data *(any)***: The data to update.
 * **[path] *(Array | string)***: The path of the property to update.
 * **change *(any)***: The change to apply.
+  * if a ***function*** then it's used to compute the new value from previous one,
+  * if a ***plain object*** then each its *value* is the ***change*** for respective key/index,
+  * otherwise it's the new value.
 
 #### Returns
 
