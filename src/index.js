@@ -6,6 +6,11 @@ const isFunc = (z) => typeof z === 'function'
 const isProps = (z) => typeof z === 'object'
   && z !== null && !protoOf(protoOf(z) || {})
 
+function extend (dst, src) {
+  for (const key in src) dst[key] = src[key]
+  return dst
+}
+
 //---------------------------------------------------------
 
 export const REMOVE = () => REMOVE
@@ -16,7 +21,7 @@ function applyChange (key, val, data, original, dataIsArray, removeLater) {
   }
 
   if (data === original) {
-    data = dataIsArray ? data.slice() : Object.assign({}, data)
+    data = dataIsArray ? data.slice() : extend({}, data)
   }
 
   if (val !== REMOVE || removeLater) {
