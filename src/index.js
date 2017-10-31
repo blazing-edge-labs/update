@@ -181,6 +181,7 @@ function updatePath (data, parts, index, change) {
       : map(data, (v) => part(v) ? f(v) : v)
   }
 
+  // part is a key/index
   const val = updatePath(data[part], parts, index, change)
   return applyValue(part, val, data, data, isArray(data), false)
 }
