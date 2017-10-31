@@ -15,7 +15,7 @@ function extend (dst, src) {
 
 export const REMOVE = () => REMOVE
 
-function applyChange (key, val, data, original, dataIsArray, removeLater) {
+function applyValue (key, val, data, original, dataIsArray, removeLater) {
   if (val === data[key] || val === REMOVE && !dataIsArray && !(key in data)) {
     return data
   }
@@ -59,7 +59,7 @@ function mapArray (array, f) {
   let ret = array
 
   for (let i = 0; i < n; ++i) {
-    ret = applyChange(i, f(array[i]), ret, array, true, true)
+    ret = applyValue(i, f(array[i]), ret, array, true, true)
   }
 
   if (ret !== array) {
@@ -73,7 +73,7 @@ function mapProps (data, keys, f) {
   const dataIsArray = isArray(data)
 
   const ret = keys.reduce((acc, key) => {
-    return applyChange(key, f(data[key]), acc, data, dataIsArray, dataIsArray)
+    return applyValue(key, f(data[key]), acc, data, dataIsArray, dataIsArray)
   }, data)
 
   if (dataIsArray && ret !== data) {
@@ -90,16 +90,19 @@ const map = (data, f) =>
 
 //---------------------------------------------------------
 
-function patch (data, props) {
-  if (isFunc(props)) return props(data)
-  if (!isProps(props)) return props
+function applyChange (data, change) {
+  if (isFunc(change)) return change(data)
+  if (isProps(change)) return patch(data, change)
+  return change
+}
 
+function patch (data, props) {
   const dataIsArray = isArray(data)
   let ret = data
 
   for (const key in props) {
-    const val = patch(data[key], props[key])
-    ret = applyChange(key, val, ret, data, dataIsArray, dataIsArray)
+    const val = applyChange(data[key], props[key])
+    ret = applyValue(key, val, ret, data, dataIsArray, dataIsArray)
   }
 
   if (dataIsArray && ret !== data) {
@@ -156,7 +159,7 @@ function toPathParts (path) {
 }
 
 function updatePath (data, parts, index, change) {
-  if (index === parts.length) return patch(data, change)
+  if (index === parts.length) return applyChange(data, change)
 
   let part = parts[index++]
   const partIsArray = isArray(part)
@@ -179,12 +182,12 @@ function updatePath (data, parts, index, change) {
   }
 
   const val = updatePath(data[part], parts, index, change)
-  return applyChange(part, val, data, data, isArray(data), false)
+  return applyValue(part, val, data, data, isArray(data), false)
 }
 
 export default function update () {
   switch (arguments.length) {
-    case 2: return patch(arguments[0], arguments[1])
+    case 2: return applyChange(arguments[0], arguments[1])
     case 3: return updatePath(arguments[0], toPathParts(arguments[1]), 0, arguments[2])
     default: throw new TypeError('invalid number of arguments')
   }
