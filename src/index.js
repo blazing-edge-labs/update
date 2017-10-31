@@ -6,9 +6,12 @@ const isFunc = (z) => typeof z === 'function'
 const isProps = (z) => typeof z === 'object'
   && z !== null && !protoOf(protoOf(z) || {})
 
-function extend (dst, src) {
-  for (const key in src) dst[key] = src[key]
-  return dst
+function cloneObject (object) {
+  const clone = Object.create(protoOf(object))
+  for (const key in object) {
+    clone[key] = object[key]
+  }
+  return clone
 }
 
 //---------------------------------------------------------
@@ -21,7 +24,7 @@ function applyValue (key, val, data, original, dataIsArray, removeLater) {
   }
 
   if (data === original) {
-    data = dataIsArray ? data.slice() : extend({}, data)
+    data = dataIsArray ? data.slice() : cloneObject(data)
   }
 
   if (val !== REMOVE || removeLater) {

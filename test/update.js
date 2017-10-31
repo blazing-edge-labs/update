@@ -5,6 +5,8 @@ import update, { REMOVE } from '../src'
 test('patch', t => {
 
   class MyClass {}
+  const instance = new MyClass
+  const noProto = Object.create(null)
 
   const data = {
     a: {},
@@ -18,10 +20,14 @@ test('patch', t => {
       arrayChanged: [1, 2, 3, 4],
       removed: [],
     },
-    instance: new MyClass,
+    instance,
+    noProto,
   }
 
-  const instance = new MyClass
+  const newInstance = new MyClass
+  const newNoProto = Object.create(null)
+  newNoProto.foo = 1
+  newNoProto.bar = 2
 
   const result = update(data, {
     b: {
@@ -40,7 +46,8 @@ test('patch', t => {
       },
       removed: REMOVE,
     },
-    instance,
+    instance: newInstance,
+    noProto: newNoProto,
   })
 
   t.same(result, {
@@ -55,13 +62,28 @@ test('patch', t => {
       arrayChanged: [49, -4, 94],
     },
     instance,
+    noProto: newNoProto,
   })
 
   t.is(result.a, data.a, 'same since not in patch')
   t.isNot(result.b, data.b, 'changed object is cloned')
   t.isNot(result.b.arrayReplaced, data.b.arrayReplaced, 'changed array is cloned')
   t.is(result.b.bc, data.b.bc, 'same since content is not changed')
-  t.is(result.instance, instance, 'handle instances as values')
+  t.is(result.instance, newInstance, 'handle instances as values')
+  t.is(result.noProto, newNoProto, 'handle Object.create(null) as values')
+
+
+  const result2 = update(result, {
+    noProto: {
+      zing: 3,
+      bar: REMOVE,
+    },
+  })
+
+  t.isNot(result2.noProto, result.noProto, 'changed noProto is not same object')
+  t.is(Object.getPrototypeOf(result2.noProto), null, 'new noProto does not have prototype')
+  t.same(result2.noProto, { foo: 1, zing: 3 })
+
   t.end()
 })
 
