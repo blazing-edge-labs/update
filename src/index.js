@@ -42,7 +42,7 @@ function applyValue (key, val, data, original, dataIsArray, removeLater) {
 
 function purgeArray (array) {
   let i = array.indexOf(REMOVE)
-  if (i === -1) return array
+  if (i === -1) return
 
   const n = array.length
 
