@@ -2,7 +2,7 @@
 
 # update
 
-Yet another utility for immutable object updates.
+Utility for immutable updates with **simple API** and with good amount of features to make it useful across different projects.
 
 ## Installation
 
@@ -32,13 +32,13 @@ More examples in the [article](https://blog.blazingedge.io/immutable-update/).
 * **data *(any)***: The data to update.
 * **[path] *(Array | string)***: The path of the property to update.
 * **change *(any)***: The change to apply.
-  * if a ***function*** then it's used to compute the new value from previous one,
-  * if a ***plain object*** then each its *value* is the ***change*** for respective key/index,
+  * if a ***function*** then it's used to compute the new value from current one,
+  * if a ***plain object*** then each its *value* is the **change** for respective key/index,
   * otherwise it's the new value.
 
 #### Returns
 
-Updated data. When no effective changes are made, returns the same `data`.
+Returns updated data. When no effective changes are made, returns the same `data`.
 
 ### `REMOVE`
 
@@ -82,7 +82,7 @@ update(state, 'path.to.users[*]', (user) => {
 
 ### Path as Array
 
-When path is passed as an array, it can also contain "filters" to selectively change values of an array/object.
+When path is passed as an array, it can also contain "filters" to selectively change multiple values of an array/object.
 
 ```js
 update(state, ['path', 'to', 'users', { lucky: true }, 'balance'], {
